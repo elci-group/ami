@@ -1,0 +1,45 @@
+[project]
+license = "MIT"
+copyright_holder = "sal"
+copyright_year = 2026
+project_name = "ami"
+
+[operation]
+mode = "observe"
+
+[generate]
+license_file = "LICENSE"
+notice_file = "NOTICE"
+copyright_file = "COPYRIGHT"
+attribution_file = "THIRD_PARTY_NOTICES"
+overwrite = true
+
+[headers]
+enabled = true
+insert_spdx = true
+exclude = ["target/**", ".git/**", ".lwoodz/**"]
+
+[compatibility]
+enforce = true
+policy = "permissive"
+
+[spdx]
+produce_manifest = true
+manifest_path = ".lwoodz/manifest.json"
+
+[audit]
+log_path = ".lwoodz/audit.jsonl"
+fail_on_incompatible = false
+
+[inference]
+enabled = false
+provider = "groq"
+model = "auto"
+groq_model = "llama-3.3-70b-versatile"
+
+[daemon]
+startup_guard = false
+
+[watch]
+path = "."
+recursive = true
