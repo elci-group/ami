@@ -83,6 +83,13 @@ impl CapabilityFrontier {
                 .file_name()
                 .and_then(|name| name.to_str())
                 .unwrap_or("?");
+            // Markers inside `#[cfg(test)]` modules are test fixtures, not
+            // signals about the shipped implementation — scan only the
+            // portion of the file above that convention.
+            let content = content
+                .split_once("#[cfg(test)]")
+                .map(|(before, _)| before)
+                .unwrap_or(content.as_str());
             for marker in LATENT_MARKERS {
                 // Skip lines where the marker only appears as a quoted string
                 // literal (e.g. this module's own `LATENT_MARKERS` table) —

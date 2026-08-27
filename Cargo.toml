@@ -1,6 +1,6 @@
 [package]
 name = "ami"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "Addressable Market Identifier - Deterministically discovers, scores, and tracks potential adopters for a project"
 license = "MIT"
