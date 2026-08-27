@@ -371,15 +371,22 @@ impl TransformationDistance {
     }
 
     pub fn band(&self) -> &'static str {
-        match self.overall() {
-            d if d < 0.10 => "no meaningful transformation",
-            d if d < 0.25 => "local behavioural extension",
-            d if d < 0.40 => "component-level evolution",
-            d if d < 0.60 => "significant architectural change",
-            d if d < 0.75 => "major product evolution",
-            d if d < 0.90 => "fundamental product transformation",
-            _ => "product identity replacement",
-        }
+        band_for(self.overall())
+    }
+}
+
+/// The section 7 distance-band table, shared by a single transformation's
+/// `overall()` and by cumulative trajectory tracking (section 18) so both
+/// report against the same scale.
+pub fn band_for(distance: f32) -> &'static str {
+    match distance {
+        d if d < 0.10 => "no meaningful transformation",
+        d if d < 0.25 => "local behavioural extension",
+        d if d < 0.40 => "component-level evolution",
+        d if d < 0.60 => "significant architectural change",
+        d if d < 0.75 => "major product evolution",
+        d if d < 0.90 => "fundamental product transformation",
+        _ => "product identity replacement",
     }
 }
 

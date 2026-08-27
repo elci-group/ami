@@ -89,6 +89,8 @@ ami analyze --github=false --reddit=true --max-phrases 10
 | `ami brand status --path <DIR>` | Inspect `.brandi/` completeness and audience coverage |
 | `ami brand monitor --path <DIR> --data <DIR>` | Compare research with the Brandi audience genome |
 | `ami brand maintain --path <DIR> --data <DIR> --apply` | Apply evidence-backed audience/narrative additions |
+| `ami evolve frontier --path <DIR>` | Show existing, latent, and reachable capabilities |
+| `ami evolve propose --description <TEXT> --outcome <TEXT> [...]` | Measure transformation distance and evaluate PR decision gates for a candidate |
 
 ## Terminal output
 
@@ -147,6 +149,42 @@ Goblin is used, when installed, for bounded deterministic classification of
 research signals. Missing Goblin or an ambiguous classification falls back to
 Ami's platform-derived segment mapping; Goblin is never used to invent
 prospects or write files.
+
+## Capability frontier and transformation gates
+
+`ami evolve` is a scoped implementation of the Ami/Vamos/Padagonia PR-governance
+model: mapping what the project can already do, measuring how far a proposed
+change would move it, and gating the decision before implementation begins.
+
+```bash
+ami evolve frontier --path .
+```
+
+Classifies capabilities as existing (detected in `Cargo.toml`/`package.json`/README),
+latent (`todo!`, `unimplemented!`, or `#[allow(dead_code)]` markers outside test
+code), or reachable (a small, deterministic rule table that only fires on
+dependencies actually present — never a guessed feature).
+
+```bash
+ami evolve propose \
+  --description "..." --outcome "..." \
+  --capability "..." --capability-status reachable --evidence stated \
+  [--base <git-ref>] [--head <git-ref>] [--record]
+```
+
+Measures the Ulysses transformation distance (component/architecture/capability/
+product-identity, each 0.0-1.0) from a git diff — `--base` defaults to `HEAD`
+and `--head` defaults to the working tree, so with no flags it measures
+uncommitted work. The distance drives an evolutionary classification
+(`MAINTENANCE` through `IDENTITY_TRANSFORMATION`) and eight decision gates.
+Gates 5 (market demand) and 8 (validation) are always reported as
+`not evaluated` rather than faked: Ami has no external demand-ingestion or
+validation-execution source wired up yet. `--record` persists the candidate,
+its distance, and every gate outcome to Padagonia when it is reachable; a
+missing Padagonia is a warning, not a fatal error, matching `ami analyze`.
+
+This intentionally stops short of the full directive: no autonomous PR
+creation, no issue/telemetry demand mining, no ontology query language.
 
 ## Research database
 

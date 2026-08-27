@@ -10,5 +10,6 @@ pub mod padagonia;
 pub mod project_reader;
 pub mod scoring;
 pub mod search_generator;
+pub mod trajectory;
 pub mod transformation;
 pub mod types;

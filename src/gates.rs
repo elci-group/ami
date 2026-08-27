@@ -11,9 +11,20 @@ use crate::types::{
     TransformationDistance,
 };
 
+/// Outcome of an actual validation run, when one was requested. `NotRun`
+/// keeps gate 8 honest by default — Ami never assumes a candidate is
+/// validated just because it was proposed.
+#[derive(Debug, Clone)]
+pub enum ValidationOutcome {
+    NotRun,
+    Passed,
+    Failed(String),
+}
+
 pub fn evaluate(
     candidate: &TransformationCandidate,
     distance: &TransformationDistance,
+    validation: &ValidationOutcome,
 ) -> Vec<GateResult> {
     vec![
         gate_1_capability_exists(candidate),
@@ -23,7 +34,7 @@ pub fn evaluate(
         gate_5_demand_evidence(candidate),
         gate_6_identity_preserved(distance),
         gate_7_appropriately_scoped(distance),
-        gate_8_validatable(),
+        gate_8_validatable(validation),
     ]
 }
 
@@ -140,11 +151,20 @@ fn gate_7_appropriately_scoped(distance: &TransformationDistance) -> GateResult 
     }
 }
 
-fn gate_8_validatable() -> GateResult {
-    GateResult::not_evaluated(
-        "8: validatable",
-        "no automated validation strategy is wired up; supply one manually before implementing",
-    )
+fn gate_8_validatable(validation: &ValidationOutcome) -> GateResult {
+    match validation {
+        ValidationOutcome::NotRun => GateResult::not_evaluated(
+            "8: validatable",
+            "no validation was run; supply one manually before implementing",
+        ),
+        ValidationOutcome::Passed => {
+            GateResult::pass("8: validatable", "the project's test suite passed")
+        }
+        ValidationOutcome::Failed(detail) => GateResult::fail(
+            "8: validatable",
+            format!("the project's test suite failed: {detail}"),
+        ),
+    }
 }
 
 #[cfg(test)]
@@ -179,7 +199,7 @@ mod tests {
     #[test]
     fn speculative_capability_fails_ontology_gate() {
         let candidate = candidate(CapabilityStatus::Speculative, EvidenceConfidence::None);
-        let results = evaluate(&candidate, &zero_distance());
+        let results = evaluate(&candidate, &zero_distance(), &ValidationOutcome::NotRun);
         let gate3 = results.iter().find(|g| g.gate.starts_with("3")).unwrap();
         assert_eq!(gate3.status, GateStatus::Fail);
     }
@@ -189,7 +209,7 @@ mod tests {
         let candidate = candidate(CapabilityStatus::Latent, EvidenceConfidence::Observed);
         let mut distance = zero_distance();
         distance.product_identity_distance = 0.8;
-        let results = evaluate(&candidate, &distance);
+        let results = evaluate(&candidate, &distance, &ValidationOutcome::NotRun);
         let gate4 = results.iter().find(|g| g.gate.starts_with("4")).unwrap();
         assert_eq!(gate4.status, GateStatus::Fail);
         let gate6 = results.iter().find(|g| g.gate.starts_with("6")).unwrap();
@@ -199,10 +219,26 @@ mod tests {
     #[test]
     fn gates_five_and_eight_are_never_a_fabricated_pass() {
         let candidate = candidate(CapabilityStatus::Existing, EvidenceConfidence::Observed);
-        let results = evaluate(&candidate, &zero_distance());
+        let results = evaluate(&candidate, &zero_distance(), &ValidationOutcome::NotRun);
         let gate5 = results.iter().find(|g| g.gate.starts_with("5")).unwrap();
         assert_eq!(gate5.status, GateStatus::Pass); // observed evidence *was* supplied here
         let gate8 = results.iter().find(|g| g.gate.starts_with("8")).unwrap();
         assert_eq!(gate8.status, GateStatus::NotEvaluated);
+    }
+
+    #[test]
+    fn validation_outcome_drives_gate_eight_directly() {
+        let candidate = candidate(CapabilityStatus::Existing, EvidenceConfidence::Observed);
+        let results = evaluate(&candidate, &zero_distance(), &ValidationOutcome::Passed);
+        let gate8 = results.iter().find(|g| g.gate.starts_with("8")).unwrap();
+        assert_eq!(gate8.status, GateStatus::Pass);
+
+        let results = evaluate(
+            &candidate,
+            &zero_distance(),
+            &ValidationOutcome::Failed("2 tests failed".to_string()),
+        );
+        let gate8 = results.iter().find(|g| g.gate.starts_with("8")).unwrap();
+        assert_eq!(gate8.status, GateStatus::Fail);
     }
 }

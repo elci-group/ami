@@ -5,13 +5,14 @@ use ami::discovery::{
     StackOverflowDiscovery,
 };
 use ami::frontier::CapabilityFrontier;
-use ami::gates;
+use ami::gates::{self, ValidationOutcome};
 use ami::inference::GroqInference;
 use ami::output::Output;
 use ami::padagonia::PadagoniaClient;
 use ami::project_reader::ProjectReader;
 use ami::scoring::ScoringModel;
 use ami::search_generator::SearchGenerator;
+use ami::trajectory::Trajectory;
 use ami::transformation;
 use ami::types::{
     CapabilityStatus, EvidenceConfidence, GateStatus, PrClassification, TransformationCandidate,
@@ -143,6 +144,23 @@ enum EvolveCommands {
         /// Persist the proposal and gate results to Padagonia
         #[arg(long)]
         record: bool,
+
+        /// Run `cargo test` in `path` and feed the result into gate 8
+        #[arg(long)]
+        validate: bool,
+    },
+    /// Show cumulative transformation distance across recent commits
+    Trajectory {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+
+        /// Number of commits to walk back from HEAD
+        #[arg(short, long, default_value_t = 10)]
+        limit: usize,
+
+        /// Stop walking at this revision (exclusive)
+        #[arg(long)]
+        since: Option<String>,
     },
 }
 
@@ -229,6 +247,7 @@ async fn main() -> Result<()> {
                 base,
                 head,
                 record,
+                validate,
             } => {
                 evolve_propose(
                     path,
@@ -240,8 +259,12 @@ async fn main() -> Result<()> {
                     base,
                     head,
                     record,
+                    validate,
                 )
                 .await
+            }
+            EvolveCommands::Trajectory { path, limit, since } => {
+                evolve_trajectory(path, limit, since)
             }
         },
     }
@@ -833,6 +856,7 @@ async fn evolve_propose(
     base: Option<String>,
     head: Option<String>,
     record: bool,
+    validate: bool,
 ) -> Result<()> {
     let ui = Output::new();
     let capability_status = parse_capability_status(&capability_status)?;
@@ -890,8 +914,15 @@ async fn evolve_propose(
         ))
     );
 
+    let validation = if validate {
+        println!("\n{}", ui.heading("🧪", "Running cargo test"));
+        run_validation(&path)
+    } else {
+        ValidationOutcome::NotRun
+    };
+
     println!("\n{}", ui.heading("🚦", "Decision gates"));
-    let gate_results = gates::evaluate(&candidate, &distance);
+    let gate_results = gates::evaluate(&candidate, &distance, &validation);
     let gate_rows = gate_results
         .iter()
         .map(|gate| {
@@ -942,6 +973,91 @@ async fn evolve_propose(
                 ))
             ),
         }
+    }
+
+    Ok(())
+}
+
+/// Actually run the project's own test suite rather than assuming a
+/// candidate is validated. Only understands `cargo test` today; a project
+/// without a `Cargo.toml` gets `NotRun` with an explanation, not a fabricated
+/// result.
+fn run_validation(path: &PathBuf) -> ValidationOutcome {
+    if !path.join("Cargo.toml").exists() {
+        return ValidationOutcome::NotRun;
+    }
+    match std::process::Command::new("cargo")
+        .arg("test")
+        .current_dir(path)
+        .status()
+    {
+        Ok(status) if status.success() => ValidationOutcome::Passed,
+        Ok(status) => ValidationOutcome::Failed(format!("exit status {status}")),
+        Err(error) => ValidationOutcome::Failed(format!("failed to run cargo test: {error}")),
+    }
+}
+
+fn evolve_trajectory(path: PathBuf, limit: usize, since: Option<String>) -> Result<()> {
+    let ui = Output::new();
+    println!(
+        "{}",
+        ui.heading(
+            "📈",
+            format!("Transformation trajectory for {}", path.display())
+        )
+    );
+
+    let trajectory = Trajectory::walk(&path, limit, since.as_deref())
+        .context("Failed to walk commit trajectory")?;
+
+    if trajectory.steps.is_empty() {
+        println!("{}", ui.info("No commits with a first parent in range"));
+        return Ok(());
+    }
+
+    let rows = trajectory
+        .steps
+        .iter()
+        .map(|step| {
+            vec![
+                step.commit.clone(),
+                step.summary.clone(),
+                format!("{:.2}", step.distance.overall()),
+                step.distance.band().to_string(),
+            ]
+        })
+        .collect::<Vec<_>>();
+    println!(
+        "{}",
+        ui.table(&["Commit", "Summary", "Distance", "Band"], &rows)
+    );
+
+    let cumulative = trajectory.cumulative();
+    println!(
+        "\n{}",
+        ui.table(
+            &["Steps", "Cumulative distance", "Clamped band"],
+            &[vec![
+                trajectory.steps.len().to_string(),
+                format!("{cumulative:.2}"),
+                ami::types::band_for(cumulative.min(1.0)).to_string(),
+            ]],
+        )
+    );
+
+    if trajectory.hidden_by_decomposition() {
+        println!(
+            "\n{}",
+            ui.warning(format!(
+                "Cumulative distance ({cumulative:.2}) crosses a significant-change threshold that no single commit reached on its own — this range should be assessed as one transformation, not {} separate small ones",
+                trajectory.steps.len()
+            ))
+        );
+    } else {
+        println!(
+            "\n{}",
+            ui.success("No cumulative drift hidden by decomposition detected in this range")
+        );
     }
 
     Ok(())
