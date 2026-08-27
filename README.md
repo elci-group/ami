@@ -151,23 +151,49 @@ prospects or write files.
 ## Research database
 
 Each analysis attempts to record the project, search phrases, prospects, and
-provenance edges in Padagonia. Configure the local HTTP graph store with:
+provenance edges in Padagonia. For instant local operability with no manual
+setup, run once from the repo root:
+
+```bash
+scripts/setup-padagonia.sh
+```
+
+This generates a `padagonia.toml` (for the server) and a matching `.env`
+(for Ami's client) with a freshly-generated API key — both gitignored, local
+dev use only. Then, in one shell:
+
+```bash
+padagonia server        # picks up ./padagonia.toml automatically
+```
+
+and in another:
+
+```bash
+source .env
+ami analyze
+```
+
+To configure by hand instead (e.g. against a remote or already-running
+Padagonia instance), set the client side directly:
 
 ```bash
 export PADAGONIA_URL="http://127.0.0.1:7373"
 export PADAGONIA_API_KEY="..."       # if the server requires bearer auth
 ```
 
-The local Padagonia server requires a non-empty API key before it will bind:
+The Padagonia server requires a non-empty API key before it will bind:
 
 ```bash
 PADAGONIA__SERVER__API_KEY="a-local-key-of-at-least-16-bytes" \
   padagonia server
 ```
 
-Padagonia failures are reported without discarding Ami's CSV output. CSV is a
-portable export; Padagonia is the provenance-rich research database when the
-service is available.
+Padagonia failures are reported without discarding Ami's CSV output — CSV is
+a portable export written before the Padagonia recording step runs, and
+Padagonia is the provenance-rich research database when the service is
+available. A failure to even configure the Padagonia client (for example, a
+malformed proxy environment variable) is treated the same way: reported as a
+warning, never as a fatal error for the run.
 
 Every prospect record includes its source URL, platform, match reasons,
 confidence, audience estimate, contact channels, and timestamps. Ami does not

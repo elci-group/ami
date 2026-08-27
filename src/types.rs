@@ -311,6 +311,173 @@ impl MailingListType {
     }
 }
 
+/// Whether a capability is demonstrably present, implied but unexposed by
+/// current architecture, reachable via a bounded transformation, or
+/// unsupported by any current project evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CapabilityStatus {
+    Existing,
+    Latent,
+    Reachable,
+    Speculative,
+}
+
+impl CapabilityStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            CapabilityStatus::Existing => "existing",
+            CapabilityStatus::Latent => "latent",
+            CapabilityStatus::Reachable => "reachable",
+            CapabilityStatus::Speculative => "speculative",
+        }
+    }
+}
+
+/// How a piece of market/demand evidence was obtained. Observed and stated
+/// evidence come from a real source; inferred and predicted evidence must
+/// never be presented as equivalent to them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum EvidenceConfidence {
+    Observed,
+    Stated,
+    Inferred,
+    Predicted,
+    None,
+}
+
+/// Component/architecture/capability/identity distance for one proposed
+/// transformation, per the Ulysses transformation scale: 0.0 is no
+/// meaningful change, 1.0 is a full product-identity replacement. These are
+/// heuristic proxies derived from a git diff, not a precise measurement.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TransformationDistance {
+    pub component_distance: f32,
+    pub architecture_distance: f32,
+    pub capability_distance: f32,
+    pub product_identity_distance: f32,
+}
+
+impl TransformationDistance {
+    /// A single weighted figure for convenience; the four axes above remain
+    /// the source of truth and should be reported alongside it, not instead
+    /// of it (see directive section 7 — this MUST NOT be reduced to one
+    /// simplistic number in the recorded proposal).
+    pub fn overall(&self) -> f32 {
+        (self.component_distance * 0.15
+            + self.architecture_distance * 0.30
+            + self.capability_distance * 0.25
+            + self.product_identity_distance * 0.30)
+            .clamp(0.0, 1.0)
+    }
+
+    pub fn band(&self) -> &'static str {
+        match self.overall() {
+            d if d < 0.10 => "no meaningful transformation",
+            d if d < 0.25 => "local behavioural extension",
+            d if d < 0.40 => "component-level evolution",
+            d if d < 0.60 => "significant architectural change",
+            d if d < 0.75 => "major product evolution",
+            d if d < 0.90 => "fundamental product transformation",
+            _ => "product identity replacement",
+        }
+    }
+}
+
+/// Evolutionary classification for a proposed PR, based on ontology and
+/// transformation distance rather than diff size alone.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PrClassification {
+    Maintenance,
+    Bugfix,
+    LocalEnhancement,
+    CapabilityExtension,
+    ArchitecturalEvolution,
+    ProductEvolution,
+    IdentityTransformation,
+}
+
+impl PrClassification {
+    pub fn from_distance(distance: &TransformationDistance) -> Self {
+        match distance.overall() {
+            d if d < 0.10 => PrClassification::Maintenance,
+            d if d < 0.25 => PrClassification::LocalEnhancement,
+            d if d < 0.40 => PrClassification::CapabilityExtension,
+            d if d < 0.60 => PrClassification::ArchitecturalEvolution,
+            d if d < 0.90 => PrClassification::ProductEvolution,
+            _ => PrClassification::IdentityTransformation,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PrClassification::Maintenance => "MAINTENANCE",
+            PrClassification::Bugfix => "BUGFIX",
+            PrClassification::LocalEnhancement => "LOCAL_ENHANCEMENT",
+            PrClassification::CapabilityExtension => "CAPABILITY_EXTENSION",
+            PrClassification::ArchitecturalEvolution => "ARCHITECTURAL_EVOLUTION",
+            PrClassification::ProductEvolution => "PRODUCT_EVOLUTION",
+            PrClassification::IdentityTransformation => "IDENTITY_TRANSFORMATION",
+        }
+    }
+}
+
+/// Outcome of one Ami decision gate (directive section 11).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GateStatus {
+    Pass,
+    Fail,
+    /// The gate requires evidence Ami does not yet have a source for (e.g.
+    /// external demand signals, a validation run). Never faked as a pass.
+    NotEvaluated,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GateResult {
+    pub gate: String,
+    pub status: GateStatus,
+    pub rationale: String,
+}
+
+impl GateResult {
+    pub fn pass(gate: impl Into<String>, rationale: impl Into<String>) -> Self {
+        Self {
+            gate: gate.into(),
+            status: GateStatus::Pass,
+            rationale: rationale.into(),
+        }
+    }
+
+    pub fn fail(gate: impl Into<String>, rationale: impl Into<String>) -> Self {
+        Self {
+            gate: gate.into(),
+            status: GateStatus::Fail,
+            rationale: rationale.into(),
+        }
+    }
+
+    pub fn not_evaluated(gate: impl Into<String>, rationale: impl Into<String>) -> Self {
+        Self {
+            gate: gate.into(),
+            status: GateStatus::NotEvaluated,
+            rationale: rationale.into(),
+        }
+    }
+}
+
+/// A candidate transformation under consideration by Ami, prior to
+/// implementation (directive section 21's minimum candidate schema, scoped
+/// to the fields Ami can presently populate with real evidence).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TransformationCandidate {
+    pub id: String,
+    pub description: String,
+    pub desired_outcome: String,
+    pub required_capability: String,
+    pub capability_status: CapabilityStatus,
+    pub market_evidence: Vec<String>,
+    pub evidence_confidence: EvidenceConfidence,
+}
+
 /// Scoring weights for prospect matching
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScoringWeights {

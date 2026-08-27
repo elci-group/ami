@@ -378,11 +378,11 @@ async fn analyze_project(path: PathBuf, output: PathBuf, options: AnalyzeOptions
         .context("Failed to generate mailing lists")?;
 
     println!("{}", ui.heading("🧠", "Recording research in Padagonia"));
-    match PadagoniaClient::from_env()
-        .context("failed to configure Padagonia")?
-        .record_analysis(&project, &phrases, &prospects)
-        .await
-    {
+    let padagonia_result = match PadagoniaClient::from_env() {
+        Ok(client) => client.record_analysis(&project, &phrases, &prospects).await,
+        Err(error) => Err(error.context("failed to configure Padagonia")),
+    };
+    match padagonia_result {
         Ok(recorded) => println!(
             "{}",
             ui.success(format!("Recorded {} research nodes", recorded))

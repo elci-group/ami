@@ -1,0 +1,25 @@
+# Example local PADAGONIA configuration for Ami's research database.
+#
+# For instant operability, don't hand-edit this file — run:
+#   scripts/setup-padagonia.sh
+# which generates padagonia.toml (gitignored) with a fresh API key and
+# writes matching PADAGONIA_URL / PADAGONIA_API_KEY values to .env.
+#
+# To configure by hand instead: copy this file to padagonia.toml, replace
+# api_key with at least 16 random bytes, then run `padagonia server` from
+# this directory (it loads ./padagonia.toml automatically) and export the
+# same values ami reads from the environment:
+#   export PADAGONIA_URL="http://127.0.0.1:7373"
+#   export PADAGONIA_API_KEY="<same value as api_key below>"
+
+[server]
+listen_addr = "127.0.0.1:7373"
+api_key = "replace-with-at-least-16-random-bytes"
+data_dir = ".padagonia-data/store.pad"
+
+[storage]
+data_dir = ".padagonia-data"
+default_graph = "graph.pad"
+
+[logging]
+level = "info"

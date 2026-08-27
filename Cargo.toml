@@ -1,6 +1,6 @@
 [package]
 name = "ami"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Addressable Market Identifier - Deterministically discovers, scores, and tracks potential adopters for a project"
 license = "MIT"
@@ -32,6 +32,7 @@ tokio = { version = "1.35", features = ["full"] }
 futures = "0.3"
 async-trait = "0.1"
 urlencoding = "2.1"
+form3 = { path = "../3form" }
 
 [dev-dependencies]
 tempfile = "3.10"

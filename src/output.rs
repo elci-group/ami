@@ -1,3 +1,7 @@
+use form3::ansi::Color;
+use form3::compat::Colorize;
+use form3::table::{Attribute, Cell, Table, TableStyle};
+use form3::term::ColorSupport;
 use std::env;
 use std::io::{self, IsTerminal};
 
@@ -23,28 +27,28 @@ impl Output {
     }
 
     pub fn heading(&self, icon: &str, text: impl AsRef<str>) -> String {
-        format!("{} {}", icon, self.paint("1;36", text.as_ref()))
+        format!("{} {}", icon, self.paint_fg(text.as_ref(), Color::Cyan))
     }
 
     pub fn success(&self, text: impl AsRef<str>) -> String {
-        format!("{} {}", self.paint("1;32", "✓"), text.as_ref())
+        format!("{} {}", self.paint_fg("✓", Color::Green), text.as_ref())
     }
 
     pub fn info(&self, text: impl AsRef<str>) -> String {
-        format!("{} {}", self.paint("1;34", "•"), text.as_ref())
+        format!("{} {}", self.paint_fg("•", Color::Blue), text.as_ref())
     }
 
     pub fn warning(&self, text: impl AsRef<str>) -> String {
-        format!("{} {}", self.paint("1;33", "!"), text.as_ref())
+        format!("{} {}", self.paint_fg("!", Color::Yellow), text.as_ref())
     }
 
     pub fn badge(&self, label: impl AsRef<str>, enabled: bool) -> String {
-        let (code, value) = if enabled {
-            ("1;32", format!("[{}]", label.as_ref()))
+        let value = format!("[{}]", label.as_ref());
+        if enabled {
+            self.paint_fg(&value, Color::Green)
         } else {
-            ("2", format!("[{}]", label.as_ref()))
-        };
-        self.paint(code, &value)
+            self.paint_dim(&value)
+        }
     }
 
     pub fn table(&self, headers: &[&str], rows: &[Vec<String>]) -> String {
@@ -52,75 +56,56 @@ impl Output {
             return String::new();
         }
 
-        let normalized_rows = rows
-            .iter()
-            .map(|row| {
-                row.iter()
-                    .map(|cell| Self::normalize_cell(cell))
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        let widths: Vec<usize> = headers
-            .iter()
-            .enumerate()
-            .map(|(index, header)| {
-                normalized_rows
-                    .iter()
-                    .map(|row| row.get(index).map_or(0, |cell| cell.chars().count()))
-                    .max()
-                    .unwrap_or(0)
-                    .max(Self::normalize_cell(header).chars().count())
-            })
-            .collect();
-
-        let border = |left: char, middle: char, right: char| {
-            format!(
-                "{}{}{}",
-                left,
-                widths
-                    .iter()
-                    .map(|width| "─".repeat(width + 2))
-                    .collect::<Vec<_>>()
-                    .join(&middle.to_string()),
-                right
-            )
-        };
-        let row = |cells: Vec<String>, header: bool| {
-            let rendered = cells
-                .into_iter()
-                .enumerate()
-                .map(|(index, cell)| {
-                    let padded = format!(" {:width$} ", cell, width = widths[index]);
-                    if header {
-                        self.paint("1;36", &padded)
+        let mut table = Table::new();
+        table.set_style(TableStyle::Square);
+        table.set_header(
+            headers
+                .iter()
+                .map(|header| {
+                    let cell = Cell::new(Self::normalize_cell(header));
+                    if self.color {
+                        cell.fg(Color::Cyan).add_attribute(Attribute::Bold)
                     } else {
-                        padded
+                        cell
                     }
                 })
+                .collect::<Vec<_>>(),
+        );
+        for row in rows {
+            let mut cells = row
+                .iter()
+                .map(|cell| Cell::new(Self::normalize_cell(cell)))
                 .collect::<Vec<_>>();
-            format!("│{}│", rendered.join("│"))
-        };
-
-        let mut lines = vec![
-            border('┌', '┬', '┐'),
-            row(headers.iter().map(|h| h.to_string()).collect(), true),
-        ];
-        lines.push(border('├', '┼', '┤'));
-        for values in &normalized_rows {
-            let mut cells = values.clone();
-            cells.resize(headers.len(), String::new());
-            lines.push(row(cells, false));
+            cells.resize_with(headers.len(), || Cell::new(""));
+            table.add_row(cells);
         }
-        lines.push(border('└', '┴', '┘'));
-        lines.join("\n")
+
+        let mut rendered = table.to_string();
+        if rendered.ends_with('\n') {
+            rendered.pop();
+        }
+        rendered
     }
 
-    fn paint(&self, code: &str, text: &str) -> String {
+    fn color_support(&self) -> ColorSupport {
         if self.color {
-            format!("\x1b[{}m{}\x1b[0m", code, text)
+            ColorSupport::Standard16
         } else {
-            text.to_string()
+            ColorSupport::NoColor
         }
+    }
+
+    fn paint_fg(&self, text: &str, color: Color) -> String {
+        text.color(color)
+            .bold()
+            .with_color_support(self.color_support())
+            .to_string()
+    }
+
+    fn paint_dim(&self, text: &str) -> String {
+        text.dimmed()
+            .with_color_support(self.color_support())
+            .to_string()
     }
 
     fn normalize_cell(value: &str) -> String {
