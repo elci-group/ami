@@ -84,7 +84,14 @@ impl CapabilityFrontier {
                 .and_then(|name| name.to_str())
                 .unwrap_or("?");
             for marker in LATENT_MARKERS {
-                if content.contains(marker) {
+                // Skip lines where the marker only appears as a quoted string
+                // literal (e.g. this module's own `LATENT_MARKERS` table) —
+                // otherwise the detector flags itself.
+                let quoted = format!("\"{marker}\"");
+                let is_real_usage = content
+                    .lines()
+                    .any(|line| line.contains(marker) && !line.contains(&quoted));
+                if is_real_usage {
                     entries.push(FrontierEntry {
                         capability: format!("incomplete implementation in src/{file_name}"),
                         status: CapabilityStatus::Latent,
