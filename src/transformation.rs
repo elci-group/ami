@@ -16,7 +16,11 @@ use std::path::{Path, PathBuf};
 ///
 /// `base` defaults to `HEAD`. `head` defaults to the working tree (including
 /// staged changes), so with no arguments this measures uncommitted work.
-pub fn measure(repo_path: &Path, base: Option<&str>, head: Option<&str>) -> Result<TransformationDistance> {
+pub fn measure(
+    repo_path: &Path,
+    base: Option<&str>,
+    head: Option<&str>,
+) -> Result<TransformationDistance> {
     let repo = Repository::open(repo_path).context("failed to open git repository")?;
 
     let base_tree = match base {
@@ -33,7 +37,9 @@ pub fn measure(repo_path: &Path, base: Option<&str>, head: Option<&str>) -> Resu
     };
 
     let mut diff_opts = DiffOptions::new();
-    diff_opts.include_untracked(true).recurse_untracked_dirs(true);
+    diff_opts
+        .include_untracked(true)
+        .recurse_untracked_dirs(true);
     let diff = match head {
         Some(reference) => {
             let head_tree = repo
@@ -48,18 +54,15 @@ pub fn measure(repo_path: &Path, base: Option<&str>, head: Option<&str>) -> Resu
     .context("failed to compute diff")?;
 
     let stats = diff.stats().context("failed to compute diff stats")?;
-    let files_changed = stats.files_changed().max(0) as f32;
-    let total_lines = (stats.insertions() + stats.deletions()).max(0) as f32;
+    let files_changed = stats.files_changed() as f32;
+    let total_lines = (stats.insertions() + stats.deletions()) as f32;
 
     let mut touched_dirs: HashSet<PathBuf> = HashSet::new();
     let mut touches_cargo_toml = false;
     let mut touches_entry_point = false;
 
     for delta in diff.deltas() {
-        let path = delta
-            .new_file()
-            .path()
-            .or_else(|| delta.old_file().path());
+        let path = delta.new_file().path().or_else(|| delta.old_file().path());
         let Some(path) = path else { continue };
         let path_str = path.to_string_lossy();
         if path_str == "Cargo.toml" {
@@ -81,9 +84,8 @@ pub fn measure(repo_path: &Path, base: Option<&str>, head: Option<&str>) -> Resu
         + (touched_dirs.len() as f32 * 0.05))
         .clamp(0.0, 1.0);
 
-    let capability_distance = ((total_lines / 500.0) * 0.6
-        + if touches_entry_point { 0.2 } else { 0.0 })
-    .clamp(0.0, 1.0);
+    let capability_distance =
+        ((total_lines / 500.0) * 0.6 + if touches_entry_point { 0.2 } else { 0.0 }).clamp(0.0, 1.0);
 
     // Identity distance only rises when a large fraction of the codebase and
     // its dependency manifest move together — a proxy for "this is no
@@ -158,10 +160,21 @@ mod tests {
         run(dir.path(), &["add", "."]);
         run(dir.path(), &["commit", "-q", "-m", "init"]);
 
-        std::fs::write(dir.path().join("Cargo.toml"), "[package]\nname=\"x\"\n[dependencies]\naxum=\"1\"\n").unwrap();
-        std::fs::write(dir.path().join("src/main.rs"), "fn main() { println!(\"rewritten\"); }\n").unwrap();
+        std::fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname=\"x\"\n[dependencies]\naxum=\"1\"\n",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.path().join("src/main.rs"),
+            "fn main() { println!(\"rewritten\"); }\n",
+        )
+        .unwrap();
 
         let distance = measure(dir.path(), None, None).unwrap();
-        assert!(distance.product_identity_distance > 0.0, "distance was {distance:?}");
+        assert!(
+            distance.product_identity_distance > 0.0,
+            "distance was {distance:?}"
+        );
     }
 }

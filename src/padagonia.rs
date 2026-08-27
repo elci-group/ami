@@ -149,7 +149,8 @@ impl PadagoniaClient {
                     vec![format!("ami:gate:{}", unix_timestamp())],
                 )
                 .await?;
-            self.create_edge(candidate_id, gate_id, "evaluated_by").await?;
+            self.create_edge(candidate_id, gate_id, "evaluated_by")
+                .await?;
             recorded += 1;
         }
         Ok(recorded)

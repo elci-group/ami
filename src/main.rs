@@ -13,7 +13,9 @@ use ami::project_reader::ProjectReader;
 use ami::scoring::ScoringModel;
 use ami::search_generator::SearchGenerator;
 use ami::transformation;
-use ami::types::{CapabilityStatus, EvidenceConfidence, GateStatus, PrClassification, TransformationCandidate};
+use ami::types::{
+    CapabilityStatus, EvidenceConfidence, GateStatus, PrClassification, TransformationCandidate,
+};
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use std::collections::HashSet;
@@ -726,4 +728,228 @@ fn maintain_brand(path: PathBuf, data: PathBuf, apply: bool) -> Result<()> {
         );
     }
     Ok(())
+}
+
+fn parse_capability_status(value: &str) -> Result<CapabilityStatus> {
+    match value.to_lowercase().as_str() {
+        "existing" => Ok(CapabilityStatus::Existing),
+        "latent" => Ok(CapabilityStatus::Latent),
+        "reachable" => Ok(CapabilityStatus::Reachable),
+        "speculative" => Ok(CapabilityStatus::Speculative),
+        other => anyhow::bail!(
+            "unknown --capability-status '{other}'; expected existing, latent, reachable, or speculative"
+        ),
+    }
+}
+
+fn parse_evidence_confidence(value: &str) -> Result<EvidenceConfidence> {
+    match value.to_lowercase().as_str() {
+        "observed" => Ok(EvidenceConfidence::Observed),
+        "stated" => Ok(EvidenceConfidence::Stated),
+        "inferred" => Ok(EvidenceConfidence::Inferred),
+        "predicted" => Ok(EvidenceConfidence::Predicted),
+        "none" => Ok(EvidenceConfidence::None),
+        other => anyhow::bail!(
+            "unknown --evidence '{other}'; expected observed, stated, inferred, predicted, or none"
+        ),
+    }
+}
+
+fn evolve_frontier(path: PathBuf) -> Result<()> {
+    let ui = Output::new();
+    let project = ProjectReader::read_from_path(&path).context("Failed to read project")?;
+    let frontier = CapabilityFrontier::analyze(&project, &path);
+
+    println!(
+        "{}",
+        ui.heading("🗺", format!("Capability frontier for {}", project.name))
+    );
+
+    println!(
+        "\n{}",
+        ui.heading(
+            "✅",
+            format!("Existing · {} total", frontier.existing.len())
+        )
+    );
+    println!(
+        "{}",
+        ui.table(
+            &["Capability", "Rationale"],
+            &frontier
+                .existing
+                .iter()
+                .map(|entry| vec![entry.capability.clone(), entry.rationale.clone()])
+                .collect::<Vec<_>>(),
+        )
+    );
+
+    println!(
+        "\n{}",
+        ui.heading("🌱", format!("Latent · {} total", frontier.latent.len()))
+    );
+    println!(
+        "{}",
+        ui.table(
+            &["Capability", "Rationale"],
+            &frontier
+                .latent
+                .iter()
+                .map(|entry| vec![entry.capability.clone(), entry.rationale.clone()])
+                .collect::<Vec<_>>(),
+        )
+    );
+
+    println!(
+        "\n{}",
+        ui.heading(
+            "🧭",
+            format!("Reachable · {} total", frontier.reachable.len())
+        )
+    );
+    println!(
+        "{}",
+        ui.table(
+            &["Capability", "Rationale"],
+            &frontier
+                .reachable
+                .iter()
+                .map(|entry| vec![entry.capability.clone(), entry.rationale.clone()])
+                .collect::<Vec<_>>(),
+        )
+    );
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn evolve_propose(
+    path: PathBuf,
+    description: String,
+    outcome: String,
+    capability: String,
+    capability_status: String,
+    evidence: String,
+    base: Option<String>,
+    head: Option<String>,
+    record: bool,
+) -> Result<()> {
+    let ui = Output::new();
+    let capability_status = parse_capability_status(&capability_status)?;
+    let evidence_confidence = parse_evidence_confidence(&evidence)?;
+
+    let candidate = TransformationCandidate {
+        id: format!("candidate-{}", unix_timestamp_secs()),
+        description,
+        desired_outcome: outcome,
+        required_capability: capability,
+        capability_status,
+        market_evidence: Vec::new(),
+        evidence_confidence,
+    };
+
+    println!("{}", ui.heading("📐", "Measuring transformation distance"));
+    let distance = transformation::measure(&path, base.as_deref(), head.as_deref())
+        .context("Failed to measure transformation distance")?;
+
+    println!(
+        "{}",
+        ui.table(
+            &["Axis", "Distance"],
+            &[
+                vec![
+                    "Component".to_string(),
+                    format!("{:.2}", distance.component_distance)
+                ],
+                vec![
+                    "Architecture".to_string(),
+                    format!("{:.2}", distance.architecture_distance)
+                ],
+                vec![
+                    "Capability".to_string(),
+                    format!("{:.2}", distance.capability_distance)
+                ],
+                vec![
+                    "Product identity".to_string(),
+                    format!("{:.2}", distance.product_identity_distance)
+                ],
+                vec![
+                    "Overall".to_string(),
+                    format!("{:.2} ({})", distance.overall(), distance.band())
+                ],
+            ],
+        )
+    );
+
+    let classification = PrClassification::from_distance(&distance);
+    println!(
+        "\n{}",
+        ui.info(format!(
+            "Evolutionary classification: {}",
+            classification.as_str()
+        ))
+    );
+
+    println!("\n{}", ui.heading("🚦", "Decision gates"));
+    let gate_results = gates::evaluate(&candidate, &distance);
+    let gate_rows = gate_results
+        .iter()
+        .map(|gate| {
+            let status = match gate.status {
+                GateStatus::Pass => ui.badge("pass", true),
+                GateStatus::Fail => ui.badge("fail", false),
+                GateStatus::NotEvaluated => ui.badge("not evaluated", false),
+            };
+            vec![gate.gate.clone(), status, gate.rationale.clone()]
+        })
+        .collect::<Vec<_>>();
+    println!("{}", ui.table(&["Gate", "Status", "Rationale"], &gate_rows));
+
+    let any_fail = gate_results
+        .iter()
+        .any(|gate| gate.status == GateStatus::Fail);
+    if any_fail {
+        println!(
+            "\n{}",
+            ui.warning("One or more gates failed; Ami should reject or decompose this candidate before implementing it")
+        );
+    } else {
+        println!(
+            "\n{}",
+            ui.success("No gate failures; remaining NotEvaluated gates still require manual evidence before implementation")
+        );
+    }
+
+    if record {
+        println!("\n{}", ui.heading("🧠", "Recording proposal in Padagonia"));
+        let result = match PadagoniaClient::from_env() {
+            Ok(client) => {
+                client
+                    .record_transformation_proposal(&candidate, &distance, &gate_results)
+                    .await
+            }
+            Err(error) => Err(error.context("failed to configure Padagonia")),
+        };
+        match result {
+            Ok(recorded) => println!(
+                "{}",
+                ui.success(format!("Recorded {} research nodes", recorded))
+            ),
+            Err(error) => eprintln!(
+                "{}",
+                ui.warning(format!(
+                    "Padagonia unavailable; proposal was not persisted: {error}"
+                ))
+            ),
+        }
+    }
+
+    Ok(())
+}
+
+fn unix_timestamp_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_secs())
+        .unwrap_or_default()
 }

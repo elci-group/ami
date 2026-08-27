@@ -152,7 +152,10 @@ mod tests {
     use super::*;
     use crate::types::GateStatus;
 
-    fn candidate(status: CapabilityStatus, evidence: EvidenceConfidence) -> TransformationCandidate {
+    fn candidate(
+        status: CapabilityStatus,
+        evidence: EvidenceConfidence,
+    ) -> TransformationCandidate {
         TransformationCandidate {
             id: "test".to_string(),
             description: "desc".to_string(),
