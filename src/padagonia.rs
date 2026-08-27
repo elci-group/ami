@@ -96,6 +96,65 @@ impl PadagoniaClient {
         Ok(recorded)
     }
 
+    /// Record a Transformation Proposal (directive sections 13-14): the
+    /// candidate, its measured distance, and every gate outcome, linked
+    /// together for later provenance queries.
+    pub async fn record_transformation_proposal(
+        &self,
+        candidate: &TransformationCandidate,
+        distance: &TransformationDistance,
+        gates: &[GateResult],
+    ) -> Result<usize> {
+        let candidate_id = self
+            .create_node(
+                "AmiTransformationCandidate",
+                json!({
+                    "id": candidate.id,
+                    "description": candidate.description,
+                    "desired_outcome": candidate.desired_outcome,
+                    "required_capability": candidate.required_capability,
+                    "capability_status": candidate.capability_status.as_str(),
+                    "evidence_confidence": format!("{:?}", candidate.evidence_confidence),
+                    "market_evidence": candidate.market_evidence,
+                    "component_distance": distance.component_distance,
+                    "architecture_distance": distance.architecture_distance,
+                    "capability_distance": distance.capability_distance,
+                    "product_identity_distance": distance.product_identity_distance,
+                    "overall_distance": distance.overall(),
+                    "band": distance.band(),
+                }),
+                1.0,
+                candidate.market_evidence.clone(),
+            )
+            .await?;
+        let mut recorded = 1;
+        for gate in gates {
+            let gate_id = self
+                .create_node(
+                    "AmiGateResult",
+                    json!({
+                        "gate": gate.gate,
+                        "status": match gate.status {
+                            GateStatus::Pass => "pass",
+                            GateStatus::Fail => "fail",
+                            GateStatus::NotEvaluated => "not_evaluated",
+                        },
+                        "rationale": gate.rationale,
+                    }),
+                    match gate.status {
+                        GateStatus::Pass => 1.0,
+                        GateStatus::Fail => 1.0,
+                        GateStatus::NotEvaluated => 0.0,
+                    },
+                    vec![format!("ami:gate:{}", unix_timestamp())],
+                )
+                .await?;
+            self.create_edge(candidate_id, gate_id, "evaluated_by").await?;
+            recorded += 1;
+        }
+        Ok(recorded)
+    }
+
     async fn create_node(
         &self,
         label: &str,

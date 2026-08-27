@@ -4,12 +4,16 @@ use ami::discovery::{
     DevToDiscovery, DiscoveryEngine, GitHubDiscovery, HackerNewsDiscovery, RedditDiscovery,
     StackOverflowDiscovery,
 };
+use ami::frontier::CapabilityFrontier;
+use ami::gates;
 use ami::inference::GroqInference;
 use ami::output::Output;
 use ami::padagonia::PadagoniaClient;
 use ami::project_reader::ProjectReader;
 use ami::scoring::ScoringModel;
 use ami::search_generator::SearchGenerator;
+use ami::transformation;
+use ami::types::{CapabilityStatus, EvidenceConfidence, GateStatus, PrClassification, TransformationCandidate};
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use std::collections::HashSet;
@@ -86,6 +90,58 @@ enum Commands {
         #[command(subcommand)]
         command: BrandCommands,
     },
+
+    /// Map the capability frontier and evaluate transformation candidates
+    Evolve {
+        #[command(subcommand)]
+        command: EvolveCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum EvolveCommands {
+    /// Show existing, latent, and reachable capabilities
+    Frontier {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+    },
+    /// Evaluate a transformation candidate against the decision gates
+    Propose {
+        #[arg(short, long, default_value = ".")]
+        path: PathBuf,
+
+        /// What is being proposed
+        #[arg(long)]
+        description: String,
+
+        /// The outcome this transformation is meant to produce
+        #[arg(long)]
+        outcome: String,
+
+        /// The capability this transformation requires
+        #[arg(long, default_value = "")]
+        capability: String,
+
+        /// Status of that capability: existing, latent, reachable, speculative
+        #[arg(long, default_value = "speculative")]
+        capability_status: String,
+
+        /// How the market/demand evidence was obtained: observed, stated, inferred, predicted, none
+        #[arg(long, default_value = "none")]
+        evidence: String,
+
+        /// Base git revision to diff from (defaults to HEAD)
+        #[arg(long)]
+        base: Option<String>,
+
+        /// Head git revision to diff to (defaults to the working tree)
+        #[arg(long)]
+        head: Option<String>,
+
+        /// Persist the proposal and gate results to Padagonia
+        #[arg(long)]
+        record: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -158,6 +214,33 @@ async fn main() -> Result<()> {
             BrandCommands::Status { path } => brand_status(path),
             BrandCommands::Monitor { path, data } => monitor_brand(path, data),
             BrandCommands::Maintain { path, data, apply } => maintain_brand(path, data, apply),
+        },
+        Commands::Evolve { command } => match command {
+            EvolveCommands::Frontier { path } => evolve_frontier(path),
+            EvolveCommands::Propose {
+                path,
+                description,
+                outcome,
+                capability,
+                capability_status,
+                evidence,
+                base,
+                head,
+                record,
+            } => {
+                evolve_propose(
+                    path,
+                    description,
+                    outcome,
+                    capability,
+                    capability_status,
+                    evidence,
+                    base,
+                    head,
+                    record,
+                )
+                .await
+            }
         },
     }
 }
