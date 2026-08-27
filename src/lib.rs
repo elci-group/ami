@@ -1,6 +1,8 @@
 pub mod brandi;
 pub mod database;
 pub mod discovery;
+pub mod frontier;
+pub mod gates;
 pub mod goblin;
 pub mod inference;
 pub mod output;
@@ -8,4 +10,5 @@ pub mod padagonia;
 pub mod project_reader;
 pub mod scoring;
 pub mod search_generator;
+pub mod transformation;
 pub mod types;

@@ -1,4 +1,7 @@
-use crate::types::{Project, Prospect, SearchPhrase};
+use crate::types::{
+    GateResult, GateStatus, Project, Prospect, SearchPhrase, TransformationCandidate,
+    TransformationDistance,
+};
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::Serialize;
