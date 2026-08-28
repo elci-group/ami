@@ -1,0 +1,161 @@
+{
+  "cluster_id": "963f0558-d883-4eb5-b2ce-90a2d3af4b8d",
+  "version": "0.3.0",
+  "bump": "Minor",
+  "event_count": 34,
+  "started_at": "2026-08-22T14:12:21.113026256Z",
+  "ended_at": "2026-08-22T14:12:21.118783970Z",
+  "diff": {
+    "structural": 0.8500375,
+    "api": 0.79375,
+    "deps": 0.725,
+    "runtime": 0.0,
+    "api_breaking": false,
+    "api_added": false,
+    "touched_paths": 22,
+    "api_touches": 11,
+    "api_signatures": 254,
+    "dependency_manifests": 2,
+    "dependency_nodes": 19,
+    "dependency_edges": 18,
+    "runtime_paths": 0,
+    "bundle": 0.0,
+    "parse_metadata": [
+      {
+        "file": "src/brandi.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/database.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/discovery.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/goblin.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/inference.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/lib.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/main.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/output.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/padagonia.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/project_reader.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/scoring.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/search_generator.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "src/types.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      },
+      {
+        "file": "tests/integration_test.rs",
+        "lang": "Rust",
+        "version": "2021",
+        "parser_used": "Ast",
+        "fallback_used": false,
+        "confidence": 0.8075,
+        "version_match": "inferred"
+      }
+    ],
+    "ast_cache_hits": 0,
+    "ast_cache_misses": 14,
+    "ast_cache_entries": 14
+  },
+  "weight": {
+    "score": 0.6806382,
+    "api_breaking": false,
+    "api_added": false
+  },
+  "air_gapped": false
+}

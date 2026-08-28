@@ -1,0 +1,10 @@
+prospect_name,prospect_url,prospect_type,confidence,contact_channel,list_type,added_at
+rust-clap-sandbox,https://github.com/killuazoldyck680/rust-clap-sandbox,Repository,0.15555555,"{""channel_type"":""GitHub"",""value"":""https://github.com/killuazoldyck680"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127261668Z
+rust-anyhow-serde-chrono-csv,https://github.com/cshonor/rust-anyhow-serde-chrono-csv,Repository,0.14444445,"{""channel_type"":""GitHub"",""value"":""https://github.com/cshonor"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127263404Z
+template-clap-anyhow,https://github.com/Kerollmops/template-clap-anyhow,Repository,0.12222222,"{""channel_type"":""GitHub"",""value"":""https://github.com/Kerollmops"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127263763Z
+cli-template,https://github.com/Kerollmops/cli-template,Repository,0.12222222,"{""channel_type"":""GitHub"",""value"":""https://github.com/Kerollmops"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127264322Z
+GrepRust,https://github.com/tobibytes/GrepRust,Repository,0.12222222,"{""channel_type"":""GitHub"",""value"":""https://github.com/tobibytes"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127264843Z
+rust-cli,https://github.com/jlcoulter/rust-cli,Repository,0.12222222,"{""channel_type"":""GitHub"",""value"":""https://github.com/jlcoulter"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127267747Z
+self-attandance-app,https://github.com/BrandCodeZ/self-attandance-app,Repository,0.12222222,"{""channel_type"":""GitHub"",""value"":""https://github.com/BrandCodeZ"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127268540Z
+hyfetcher,https://github.com/hyperplasma/hyfetcher,Repository,0.1,"{""channel_type"":""GitHub"",""value"":""https://github.com/hyperplasma"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127268807Z
+ccny-course-catalog-wrapper,https://github.com/DeveloperMindset123/ccny-course-catalog-wrapper,Repository,0.1,"{""channel_type"":""GitHub"",""value"":""https://github.com/DeveloperMindset123"",""verified"":true}",OpenSource,2026-08-27T18:29:03.127269056Z

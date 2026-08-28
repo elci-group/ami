@@ -1,0 +1,17 @@
+{
+  "last_app_version": "0.1.1",
+  "last_head": "1722ad7",
+  "last_check": "2026-08-27T17:04:34.762911433Z",
+  "events": [
+    "[2026-08-06 23:27:51] change detected: app ? -> 0.1.0, head None -> Some(\"256c052\")",
+    "[2026-08-06 23:27:51] resolve ami: load (skill verified for app 0.1.0)",
+    "[2026-08-06 23:32:21] change detected: app 0.1.0 -> 0.1.0, head Some(\"256c052\") -> Some(\"53f6d0f\")",
+    "[2026-08-06 23:32:21] resolve ami: load (skill verified for app 0.1.0)",
+    "[2026-08-06 23:33:21] change detected: app 0.1.0 -> 0.1.0, head Some(\"53f6d0f\") -> Some(\"845682d\")",
+    "[2026-08-06 23:33:21] resolve ami: load (skill verified for app 0.1.0)",
+    "[2026-08-26 16:14:11] change detected: app 0.1.0 -> 0.1.0, head Some(\"845682d\") -> Some(\"c7216e1\")",
+    "[2026-08-26 16:14:11] resolve ami: load (skill verified for app 0.1.0)",
+    "[2026-08-26 16:19:11] change detected: app 0.1.0 -> 0.1.1, head Some(\"c7216e1\") -> Some(\"1722ad7\")",
+    "[2026-08-26 16:19:11] resolve ami: load (patch bump 0.1.0 -> 0.1.1 (dependency state unknown))"
+  ]
+}

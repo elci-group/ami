@@ -1,0 +1,44 @@
+   0.312492846s  INFO prepare_target{force=false package_id=ami v0.1.9 (/home/sal/ami) target="evolve_cli_test"}: cargo::core::compiler::fingerprint: fingerprint error for ami v0.1.9 (/home/sal/ami)/Check { test: true }/TargetInner { kind: "test", name: "evolve_cli_test", benched: false, ..: with_path("/home/sal/ami/tests/evolve_cli_test.rs", Edition2021) }
+   0.312515097s  INFO prepare_target{force=false package_id=ami v0.1.9 (/home/sal/ami) target="evolve_cli_test"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/sal/ami/target/debug/.fingerprint/ami-6a6eb5c7b9f27d3a/test-integration-test-evolve_cli_test`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_with_exec
+   7: cargo::ops::cargo_compile::compile
+   8: cargo::commands::check::exec
+   9: <cargo::cli::Exec>::exec
+  10: cargo::main
+  11: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  12: std::rt::lang_start::<()>::{closure#0}
+  13: <&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:287:21
+  14: std::panicking::catch_unwind::do_call::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:576:43
+  15: std::panicking::catch_unwind::<i32, &dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:544:19
+  16: std::panic::catch_unwind::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panic.rs:359:14
+  17: std::rt::lang_start_internal::{closure#0}
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/rt.rs:175:24
+  18: std::panicking::catch_unwind::do_call::<std::rt::lang_start_internal::{closure#0}, isize>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:576:43
+  19: std::panicking::catch_unwind::<isize, std::rt::lang_start_internal::{closure#0}>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:544:19
+  20: std::panic::catch_unwind::<std::rt::lang_start_internal::{closure#0}, isize>
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panic.rs:359:14
+  21: std::rt::lang_start_internal
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/rt.rs:171:5
+  22: main
+  23: <unknown>
+  24: __libc_start_main
+  25: <unknown>
+    Checking ami v0.1.9 (/home/sal/ami)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.15s

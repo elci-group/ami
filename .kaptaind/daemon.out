@@ -1,0 +1,13 @@
+[2m2026-08-28T08:31:45.308560Z[0m [32m INFO[0m [2mkaptaind[0m[2m:[0m Starting kaptaind
+[2m2026-08-28T08:31:45.310896Z[0m [32m INFO[0m [2mkaptaind[0m[2m:[0m Watching repository at: /home/sal/ami
+[2m2026-08-28T08:31:45.317212Z[0m [32m INFO[0m [2mkaptaind::daemon::runtime[0m[2m:[0m capability network_push is disabled
+[2m2026-08-28T08:31:45.317221Z[0m [32m INFO[0m [2mkaptaind::daemon::runtime[0m[2m:[0m capability network_webhooks is disabled
+[2m2026-08-28T08:31:45.317224Z[0m [32m INFO[0m [2mkaptaind::daemon::runtime[0m[2m:[0m capability network_inference is disabled
+[2m2026-08-28T08:31:45.317226Z[0m [32m INFO[0m [2mkaptaind::daemon::runtime[0m[2m:[0m capability bundle_scoring is disabled
+[2m2026-08-28T08:31:45.317228Z[0m [32m INFO[0m [2mkaptaind::daemon::runtime[0m[2m:[0m capability external_plugins is disabled
+[2m2026-08-28T08:31:45.317312Z[0m [32m INFO[0m [2mkaptaind::daemon::health[0m[2m:[0m health server listening [3maddr[0m[2m=[0m127.0.0.1:3175
+[2m2026-08-28T08:31:46.980084Z[0m [32m INFO[0m [2mkaptaind::angler::git_hooks[0m[2m:[0m Installed 7 git hooks
+[2m2026-08-28T08:31:46.980104Z[0m [32m INFO[0m [2mkaptaind::angler[0m[2m:[0m Git hooks installed successfully
+[2m2026-08-28T08:31:46.980109Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Angler system initialized
+[2m2026-08-28T08:31:51.997931Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0m8f787e9f-68ea-4426-8174-c8f3d2aa3492
+[2m2026-08-28T08:32:48.667383Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Token usage and cost tracking [3minput_tokens[0m[2m=[0m994 [3moutput_tokens[0m[2m=[0m35 [3mmarginal_cost[0m[2m=[0m0.0005495000000000001 [3maggregate_cost[0m[2m=[0m0.36195249999999995
