@@ -1,12 +1,12 @@
 {
-  "cluster_id": "a92f5430-4818-4944-98e8-d97aa84cb175",
-  "version": "0.1.66",
+  "cluster_id": "7c5d5a2d-badc-4165-a874-f5c74e28eae3",
+  "version": "0.1.1067",
   "bump": "Patch",
   "event_count": 13,
-  "started_at": "2026-08-28T08:47:38.152332547Z",
-  "ended_at": "2026-08-28T08:47:38.152668821Z",
+  "started_at": "2026-08-28T12:21:35.626437757Z",
+  "ended_at": "2026-08-28T12:21:35.632220944Z",
   "diff": {
-    "structural": 0.33646584,
+    "structural": 0.33649582,
     "api": 0.0,
     "deps": 0.0,
     "runtime": 0.0,
@@ -26,7 +26,7 @@
     "ast_cache_entries": 17
   },
   "weight": {
-    "score": 0.11776304,
+    "score": 0.11777353,
     "api_breaking": false,
     "api_added": false
   },
