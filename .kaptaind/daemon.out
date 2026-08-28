@@ -11,3 +11,5 @@
 [2m2026-08-28T08:31:46.980109Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Angler system initialized
 [2m2026-08-28T08:31:51.997931Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0m8f787e9f-68ea-4426-8174-c8f3d2aa3492
 [2m2026-08-28T08:32:48.667383Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Token usage and cost tracking [3minput_tokens[0m[2m=[0m994 [3moutput_tokens[0m[2m=[0m35 [3mmarginal_cost[0m[2m=[0m0.0005495000000000001 [3maggregate_cost[0m[2m=[0m0.36195249999999995
+[2m2026-08-28T08:33:25.100082Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by new event [3mcluster_id[0m[2m=[0m6d237db5-2087-4319-89e6-df3773f04f70
+[2m2026-08-28T08:33:26.446294Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Token usage and cost tracking [3minput_tokens[0m[2m=[0m621 [3moutput_tokens[0m[2m=[0m35 [3mmarginal_cost[0m[2m=[0m0.00036300000000000004 [3maggregate_cost[0m[2m=[0m0.3623154999999999
