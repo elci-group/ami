@@ -217,3 +217,6 @@
 [2m2026-08-29T07:53:41.574407Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0mfd455338-e0a9-45d7-99ad-4d0071ff4557
 [2m2026-08-29T07:53:46.578472Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0m18f7b8a5-1493-4f2e-b872-934eb5a5582b
 [2m2026-08-29T07:53:47.910720Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Token usage and cost tracking [3minput_tokens[0m[2m=[0m12193 [3moutput_tokens[0m[2m=[0m35 [3mmarginal_cost[0m[2m=[0m0.006149 [3maggregate_cost[0m[2m=[0m9030.258450499996
+[2m2026-08-29T07:53:55.891599Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0mee9afc21-c73f-45aa-80f0-1a0e5491e22d
+[2m2026-08-29T07:54:00.894644Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m cluster window expired by timeout [3mcluster_id[0m[2m=[0m9a74ea39-db03-4ceb-8b0e-b5a6d473b556
+[2m2026-08-29T07:54:02.251556Z[0m [32m INFO[0m [2mkaptaind::daemon::scheduler[0m[2m:[0m Token usage and cost tracking [3minput_tokens[0m[2m=[0m12361 [3moutput_tokens[0m[2m=[0m35 [3mmarginal_cost[0m[2m=[0m0.006233 [3maggregate_cost[0m[2m=[0m9030.264683499996
