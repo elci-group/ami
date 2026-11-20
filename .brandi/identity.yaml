@@ -1,0 +1,10 @@
+product:
+  name: Ami
+  tagline: "Know your market before you ship."
+  mission: "Deterministically discover, score, and track who would actually adopt this project."
+  aliases: []
+  former_names: []
+archetype: ["explorer", "scout", "cartographer"]
+terminology:
+  canonical: {}
+  banned_variants: {}
